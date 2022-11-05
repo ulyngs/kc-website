@@ -1,4 +1,4 @@
-baseURL: https://karaokecollective.com
+baseURL: https://karaokecollective.netlify.app
 disableKinds:
   - section
   - taxonomy
