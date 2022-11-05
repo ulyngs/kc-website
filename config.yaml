@@ -1,0 +1,18 @@
+baseURL: https://karaokecollective.com
+disableKinds:
+  - section
+  - taxonomy
+  - term
+  - RSS
+  - robotsTXT
+defaultContentLanguage: en
+theme: hugo-scroll
+title: The Karaoke Collective
+params:
+  copyright: © Ulrik Lyngs
+  description: Karaoke with a live band
+  favicon: images/favicon.jpeg
+  images: images/cropped-medley-img.jpg
+  meta:
+    keywords: karaoke, bandaoke, live band, oxford, ball, house parties
+  title: Welcome to the Karaoke Collective
