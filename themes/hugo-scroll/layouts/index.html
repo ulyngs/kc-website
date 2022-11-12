@@ -10,7 +10,7 @@
               {{ with .Params.header_headline }}<h1 class="blog-title">{{ . }}</h1>{{ end }}
               {{ with .Params.header_subheadline }}<h2 class="blog-description">{{ . }}</h2>{{ end }}
             </div>
-
+            
             {{ range where $sections ".Params.header_menu" "eq" true }}
                  <a class='btn site-menu' data-title-anchor='{{ anchorize .Title }}'>{{ .Title }}</a>
             {{ end }}
@@ -26,7 +26,11 @@
         <div class='post-holder'>
             <article id='{{ anchorize .Title }}' class='post {{ if eq $index_val 0 }}first{{ end }} {{ if eq (add $index_val 1) (len $sections) }}last{{ end }}'>
                 <header class="post-header">
+                    {{ if .Params.pageTitle }}
+                    <h2 class="post-title">{{ .Params.pageTitle }}</h2>
+                    {{ else }}
                     <h2 class="post-title">{{ .Title }}</h2>
+                    {{ end }}
                 </header>
                 <section class="post-content">
                     {{ .Content }}
