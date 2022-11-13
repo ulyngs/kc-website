@@ -9,4 +9,4 @@ Blending the fun of karaoke with the magic of a live band, the Karaoke Collectiv
 
 For bookings, contact bookings@karaokecollective.com
 
-The Karaoke Collective is an eclectic group of musicians based in Oxford. We perform at bars, pubs, house parties, weddings, college bops and balls, and more.
+The Karaoke Collective is an eclectic group of musicians based in Oxford. We perform at college bops and balls, bars, pubs, weddings, house parties, and more.
