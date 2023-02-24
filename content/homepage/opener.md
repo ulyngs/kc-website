@@ -3,7 +3,7 @@ weight: 1
 header_menu: false
 ---
 
-{{< youtube _Pp3ZzvVXeM >}}
+{{< youtube 2TeIvEunO84 >}}
 
 Blending the fun of karaoke with the magic of a live band, the Karaoke Collective let you join a musical playground where anything can happen!
 
