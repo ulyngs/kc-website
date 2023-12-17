@@ -2,6 +2,8 @@
 title: "Songlist"
 weight: 2
 header_menu: true
+params:
+  fetch: no
 ---
 
 ```{r setup, include=FALSE}
@@ -10,10 +12,13 @@ library(reactable)
 library(tidyverse)
 library(htmltools)
 
-# library(googlesheets4)
-# googlesheets4::gs4_deauth()
-# songlist <- read_sheet("https://docs.google.com/spreadsheets/d/1XiFg2oZgTfmruQQW7kpmxvW9aYP_lF8r40WaCIsmjoE/edit?usp=sharing", sheet = "songlist")
-#songlist |> write_csv(here::here("data", "songlist.csv"))
+if(params$fetch){
+  library(googlesheets4)
+  library(readr)
+  read_sheet("https://docs.google.com/spreadsheets/d/1XiFg2oZgTfmruQQW7kpmxvW9aYP_lF8r40WaCIsmjoE/edit?usp=sharing", sheet = "songlist") |> 
+    write_csv(here::here("data/songlist.csv"))
+
+}
 
 songlist <- read_csv(here::here("data", "songlist.csv"), skip = 1) |> 
   distinct(song_title, artist)
