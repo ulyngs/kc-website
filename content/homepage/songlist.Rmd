@@ -3,7 +3,7 @@ title: "Songlist"
 weight: 2
 header_menu: true
 params:
-  fetch: no
+  fetch: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -15,6 +15,7 @@ library(htmltools)
 if(params$fetch){
   library(googlesheets4)
   library(readr)
+  gs4_deauth()
   read_sheet("https://docs.google.com/spreadsheets/d/1XiFg2oZgTfmruQQW7kpmxvW9aYP_lF8r40WaCIsmjoE/edit?usp=sharing", sheet = "songlist") |> 
     write_csv(here::here("data/songlist.csv"))
 
