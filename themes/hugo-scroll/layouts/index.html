@@ -14,6 +14,7 @@
             {{ range where $sections ".Params.header_menu" "eq" true }}
                  <a class='btn site-menu' data-title-anchor='{{ anchorize .Title }}'>{{ .Title }}</a>
             {{ end }}
+                 <a class='btn site-menu' href="https://kc-wheel.vercel.app" >Genre Wheel</a>
             <i id='header-arrow' class="fa fa-angle-down"></i>
         </div>
     </div>
