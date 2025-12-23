@@ -3,7 +3,7 @@ title: "Songlist"
 weight: 2
 header_menu: true
 params:
-  fetch: yes
+  fetch: no
 ---
 
 ```{r setup, include=FALSE}
@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(reactable)
 library(tidyverse)
 library(htmltools)
+library(jsonlite)
 
 if(params$fetch){
   library(googlesheets4)
@@ -21,8 +22,11 @@ if(params$fetch){
 
 }
 
-songlist <- read_csv(here::here("data", "songlist.csv"), skip = 1) |> 
-  distinct(song_title, artist)
+songlist <- read_csv(here::here("data", "songlist.csv"), skip = 1)
+
+# Filter out Christmas songs by default
+songlist_all <- songlist |> distinct(song_title, artist, is_xmas)
+songlist <- songlist_all |> filter(is.na(is_xmas) | is_xmas != TRUE)
 ```
 
 ```{css}
@@ -41,6 +45,51 @@ songlist <- read_csv(here::here("data", "songlist.csv"), skip = 1) |>
   margin-top: 1em;
   margin-bottom: 1.5em;
 }
+#xmas-toggle-container {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.xmas-toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+.xmas-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #228B22;
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
 #songlist-table .rt-table {
   background: #b80135;
 }
@@ -48,21 +97,69 @@ songlist <- read_csv(here::here("data", "songlist.csv"), skip = 1) |>
 
 
 ```{r}
-songlist_table <- songlist |> 
-  select(Song = song_title, Artist = artist) |> 
+# Create the table data with all songs and xmas info
+songlist_table_data <- songlist_all |>
+  select(Song = song_title, Artist = artist, is_xmas)
+
+songlist_table <- songlist_table_data |>
+  select(Song, Artist) |>
   reactable(elementId = "songlist-table",
             searchable = TRUE,
             pagination = FALSE,
             height = 800,
             borderless = TRUE)
+
+# Calculate counts
+total_songs <- nrow(songlist_all |> filter(is.na(is_xmas) | is_xmas != TRUE))
+xmas_songs <- nrow(songlist_all |> filter(is_xmas == TRUE))
+
 tagList(
+    # Christmas toggle
+    div(id = "xmas-toggle-container",
+        tags$label("Christmas mode",
+                   tags$label(class = "xmas-toggle",
+                              tags$input(type = "checkbox", id = "xmas-toggle"),
+                              tags$span(class = "slider")
+                   )
+        )
+    ),
+    # Search input
     div(tags$input(
           type = "text",
           class = "rt-search",
           id = "custom-search",
-          placeholder = glue::glue("Search {nrow(songlist)} songs"),
+          placeholder = glue::glue("Search {total_songs} songs"),
           oninput = "Reactable.setSearch('songlist-table', this.value)"
         )),
-    songlist_table
+    songlist_table,
+
+    # JavaScript for toggle functionality
+    tags$script(HTML(sprintf("
+      // Store the full dataset
+      const allSongs = %s;
+      const regularSongs = allSongs.filter(song => !song.is_xmas || song.is_xmas === null);
+      const xmasSongs = allSongs.filter(song => song.is_xmas === true);
+
+      // Function to update table
+      function updateTable(showXmasOnly) {
+        const data = showXmasOnly ? xmasSongs : regularSongs;
+        const table = document.getElementById('songlist-table');
+        const searchInput = document.getElementById('custom-search');
+
+        // Update search placeholder
+        searchInput.placeholder = `Search ${data.length} songs`;
+
+        // Update the reactable table
+        Reactable.setData('songlist-table', data.map(song => ({
+          Song: song.Song,
+          Artist: song.Artist
+        })));
+      }
+
+      // Toggle event listener
+      document.getElementById('xmas-toggle').addEventListener('change', function() {
+        updateTable(this.checked);
+      });
+    ", jsonlite::toJSON(songlist_table_data))))
 )
 ```
