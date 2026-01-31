@@ -13,16 +13,10 @@ library(tidyverse)
 library(htmltools)
 library(jsonlite)
 
-if(params$fetch){
-  library(googlesheets4)
-  library(readr)
-  gs4_deauth()
-  read_sheet("https://docs.google.com/spreadsheets/d/1XiFg2oZgTfmruQQW7kpmxvW9aYP_lF8r40WaCIsmjoE/edit?usp=sharing", sheet = "songlist") |> 
-    write_csv(here::here("data/songlist.csv"))
-
-}
-
-songlist <- read_csv(here::here("data", "songlist.csv"), skip = 1)
+# Read from local JSON metadata backup file
+songlist <- fromJSON(here::here("songbook-metadata-2026-01-31.json")) |>
+  as_tibble() |>
+  rename(song_title = title, is_xmas = isXmas)
 
 # Filter out Christmas songs by default
 songlist_all <- songlist |> distinct(song_title, artist, is_xmas)
@@ -37,25 +31,70 @@ songlist <- songlist_all |> filter(is.na(is_xmas) | is_xmas != TRUE)
   border-bottom: 1px solid white;
   font-size: 0.95em;
 }
+#search-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 0.5em;
+  margin-bottom: 5px;
+}
+@media (max-width: 600px) {
+  #search-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  #custom-search {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+  #xmas-toggle-container {
+    justify-content: flex-start;
+  }
+}
 #custom-search {
-  margin-bottom: 10px;
-  background-color: #b80135;
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: white;
+  font-size: 0.9em;
+  outline: none;
+  transition: all 0.2s ease;
+}
+#custom-search::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+#custom-search:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 #title-block-header {
   margin-top: 1em;
-  margin-bottom: 1.5em;
+  margin-bottom: 2em;
+}
+h1.title, .title {
+  padding-bottom: 0.5em;
 }
 #xmas-toggle-container {
-  margin-bottom: 15px;
   display: flex;
   align-items: center;
   gap: 10px;
+  white-space: nowrap;
+  height: 100%;
+}
+#xmas-toggle-container > label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
 }
 .xmas-toggle {
   position: relative;
   display: inline-block;
-  width: 50px;
-  height: 24px;
+  width: 52px;
+  height: 28px;
 }
 .xmas-toggle input {
   opacity: 0;
@@ -69,26 +108,36 @@ songlist <- songlist_all |> filter(is.na(is_xmas) | is_xmas != TRUE)
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 28px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.slider:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 input:checked + .slider {
-  background-color: #228B22;
+  background: linear-gradient(135deg, #2d5a27 0%, #1e7b1e 100%);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(30, 123, 30, 0.4);
 }
 input:checked + .slider:before {
-  transform: translateX(26px);
+  transform: translateX(24px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 #songlist-table .rt-table {
   background: #b80135;
@@ -103,38 +152,45 @@ songlist_table_data <- songlist_all |>
 
 songlist_table <- songlist_table_data |>
   select(Song, Artist) |>
-  reactable(elementId = "songlist-table",
-            searchable = TRUE,
-            pagination = FALSE,
-            height = 800,
-            borderless = TRUE)
+  reactable(
+    elementId = "songlist-table",
+    searchable = TRUE,
+    pagination = FALSE,
+    height = 800,
+    borderless = TRUE
+  )
 
 # Calculate counts
 total_songs <- nrow(songlist_all |> filter(is.na(is_xmas) | is_xmas != TRUE))
 xmas_songs <- nrow(songlist_all |> filter(is_xmas == TRUE))
 
 tagList(
-    # Christmas toggle
-    div(id = "xmas-toggle-container",
-        tags$label("Christmas mode",
-                   tags$label(class = "xmas-toggle",
-                              tags$input(type = "checkbox", id = "xmas-toggle"),
-                              tags$span(class = "slider")
-                   )
-        )
+  # Search row with toggle
+  div(
+    id = "search-row",
+    tags$input(
+      type = "text",
+      class = "rt-search",
+      id = "custom-search",
+      placeholder = glue::glue("Search {total_songs} songs"),
+      oninput = "Reactable.setSearch('songlist-table', this.value)"
     ),
-    # Search input
-    div(tags$input(
-          type = "text",
-          class = "rt-search",
-          id = "custom-search",
-          placeholder = glue::glue("Search {total_songs} songs"),
-          oninput = "Reactable.setSearch('songlist-table', this.value)"
-        )),
-    songlist_table,
+    div(
+      id = "xmas-toggle-container",
+      tags$label(
+        "🎄 Xmas songs",
+        tags$label(
+          class = "xmas-toggle",
+          tags$input(type = "checkbox", id = "xmas-toggle"),
+          tags$span(class = "slider")
+        )
+      )
+    )
+  ),
+  songlist_table,
 
-    # JavaScript for toggle functionality
-    tags$script(HTML(sprintf("
+  # JavaScript for toggle functionality
+  tags$script(HTML(sprintf("
       // Store the full dataset
       const allSongs = %s;
       const regularSongs = allSongs.filter(song => !song.is_xmas || song.is_xmas === null);
