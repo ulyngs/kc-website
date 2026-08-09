@@ -4,7 +4,6 @@
       <section class="copyright">{{ . | markdownify }}</section>{{ end }}
 
 
-    <section>{{ echoParam .Site.Params "hidebyline" }}</section>
     {{ if ne .Site.Params.hidedesignbyline true }}
       <section>
         <a href="https://themes.gohugo.io/hugo-scroll/">Design</a> template
