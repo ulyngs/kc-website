@@ -3,3 +3,26 @@
   border-radius: 22px;
   padding-bottom: 6px;
 }
+
+/* Scroll cue: SVG instead of Fork Awesome so a missing icon font can't show □ */
+#header-arrow {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: inherit;
+  line-height: 0;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+}
+
+#header-arrow svg {
+  display: block;
+  width: 3rem;
+  height: 3rem;
+}

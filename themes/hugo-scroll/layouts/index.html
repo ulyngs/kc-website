@@ -15,7 +15,11 @@
                  <a class='btn site-menu' data-title-anchor='{{ anchorize .Title }}'>{{ .Title }}</a>
             {{ end }}
                  <a class='btn site-menu' href="https://wheel.karaokecollective.com" >Genre Wheel</a>
-            <i id='header-arrow' class="fa fa-angle-down"></i>
+            <button type="button" id="header-arrow" aria-label="Scroll to content">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+              </svg>
+            </button>
         </div>
     </div>
 </header>
