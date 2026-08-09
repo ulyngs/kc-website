@@ -4,7 +4,8 @@
   padding-bottom: 6px;
 }
 
-/* Scroll cue: SVG instead of Fork Awesome so a missing icon font can't show □ */
+/* Scroll cue: SVG instead of Fork Awesome so a missing icon font can't show □.
+   Positioned relative to .inner — keep it below the CTAs, not on top of them. */
 #header-arrow {
   appearance: none;
   -webkit-appearance: none;
@@ -13,16 +14,17 @@
   color: #fff;
   font-size: inherit;
   line-height: 0;
-  padding: 0;
+  padding: 0.5rem;
   margin: 0;
   width: auto;
   left: 50%;
-  bottom: 1.5rem;
+  top: 100%;
+  bottom: auto;
   transform: translateX(-50%);
 }
 
 #header-arrow svg {
   display: block;
-  width: 3rem;
-  height: 3rem;
+  width: 2.75rem;
+  height: 2.75rem;
 }
