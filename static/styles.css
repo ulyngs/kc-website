@@ -9,6 +9,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
+  font-weight: 400;
 }
 
 #site-head a.btn + a.btn {
